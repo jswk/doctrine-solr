@@ -1,0 +1,10 @@
+// eclipse
+.settings
+.buildpath
+.project
+
+// composer
+composer.phar
+composer.lock
+
+vendor

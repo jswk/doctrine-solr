@@ -1,0 +1,22 @@
+{
+    "name": "jswk/doctrine-solr",
+    "description": "Solr and Doctrine integration",
+    "keywords": ["search", "solr"],
+    "homepage": "https://github.com/jswk/doctrine-solr",
+    "type": "library",
+
+    "require": {
+        "php": ">=5.4.3",
+        "doctrine/common": "dev-master",
+        "solarium/solarium": "dev-master"
+    },
+    "dev-require": {
+        "doctrine/mongodb-odm": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "Doctrine\\Solr": "lib/"
+        }
+    },
+    "minimum-stability" : "dev"
+}
