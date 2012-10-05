@@ -8,10 +8,10 @@
     "require": {
         "php": ">=5.4.3",
         "doctrine/common": "dev-master",
+        "doctrine/mongodb-odm": "dev-master",
         "solarium/solarium": "dev-master"
     },
     "dev-require": {
-        "doctrine/mongodb-odm": "dev-master"
     },
     "autoload": {
         "psr-0": {
