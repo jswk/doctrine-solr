@@ -9,11 +9,11 @@
          processIsolation="false"
          stopOnFailure="false"
          syntaxCheck="false"
-         bootstrap=".tests/bootstrap.php"
+         bootstrap="./tests/bootstrap.php"
 >
   <testsuites>
     <testsuite name="Doctrine Solr Test Suite">
-      <directory>./tests/Unit/Doctrine/Solr</directory>
+      <directory>./tests/Doctrine/Solr/Tests</directory>
     </testsuite>
   </testsuites>
   <filter>
