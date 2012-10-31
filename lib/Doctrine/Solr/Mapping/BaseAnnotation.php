@@ -1,7 +1,7 @@
 <?php
 namespace Doctrine\Solr\Mapping;
 
-class BaseAnnotation
+abstract class BaseAnnotation
 {
     /**
      * Error handler for unknown property accessor in BaseAnnotation class.

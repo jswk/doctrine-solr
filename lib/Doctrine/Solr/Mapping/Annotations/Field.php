@@ -1,7 +1,7 @@
 <?php
 namespace Doctrine\Solr\Mapping\Annotations;
 
-use \Doctrine\Solr\Mapping\BaseAnnotation;
+use \Doctrine\Solr\Mapping\PropertyAnnotation;
 
 /**
  * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
@@ -9,40 +9,19 @@ use \Doctrine\Solr\Mapping\BaseAnnotation;
  * @Annotation
  * @Target("PROPERTY")
  */
-class Field extends BaseAnnotation
+class Field extends PropertyAnnotation
 {
     public $type;
-
-    public $indexed;
-
-    public $stored;
-
-    public $sortMissingLast;
-
-    public $sortMissingFirst;
-
-    public $multiValued;
-
-    public $uniqueKey;
-
-    /* TODO: fetch more Solr options */
 
     /**
      *
      * @param array $options
-     * @throws DocumentAnnotationTypeNotSpecifiedException
+     * @throws \InvalidArgumentException
      */
     public function __construct(array $options)
     {
-        if (!isset($options['type'])) {
-            throw new \InvalidArgumentException(sprintf('Value must be defined for %s', get_class($this)));
-        }
+        $obligatory = ['type'];
 
-        foreach ($options as $property => $value) {
-            if (!property_exists($this, $property)) {
-                throw new \InvalidArgumentException(sprintf('Property "%s" does not exist', $property));
-            }
-            $this->$property = $value;
-        }
+        parent::__construct($options, $obligatory);
     }
 }

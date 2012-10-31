@@ -1,11 +1,11 @@
 <?php
 namespace Doctrine\Solr;
 
-use \Exception;
+use \Exception as BaseException;
 
 /**
  * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
  */
-class BaseException extends Exception
+class Exception extends BaseException
 {
 }

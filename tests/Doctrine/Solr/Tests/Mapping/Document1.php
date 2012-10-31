@@ -12,7 +12,8 @@ class Document1
 {
     /**
      * @ODM\Id
-     * @SOLR\Field(type="string", uniqueKey=true)
+     * @SOLR\Field(type="string")
+     * @SOLR\UniqueKey
      */
     protected $id;
 

@@ -12,7 +12,8 @@ class AnnotationTest extends PHPUnit_Framework_TestCase
     private $reader;
     private $item;
     private $classAnnotation = 'Doctrine\\Solr\\Mapping\\Annotations\\Document';
-    private $propertyAnnotation = 'Doctrine\\Solr\\Mapping\\Annotations\\Field';
+    private $fieldAnnotation = 'Doctrine\\Solr\\Mapping\\Annotations\\Field';
+    private $uniqueAnnotation = 'Doctrine\\Solr\\Mapping\\Annotations\\UniqueKey';
 
     public function setUp()
     {
@@ -42,13 +43,14 @@ class AnnotationTest extends PHPUnit_Framework_TestCase
 
         $count = 0;
         foreach($class->getProperties() as $property) {
-            $annotation = $this->reader->getPropertyAnnotation($property, $this->propertyAnnotation);
+            $annotation = $this->reader->getPropertyAnnotation($property, $this->fieldAnnotation);
             if ($annotation == null) {
                 continue;
             }
 
+            $this->assertInstanceOf($this->fieldAnnotation, $annotation);
+
             ++$count;
-            $this->assertInstanceOf($this->propertyAnnotation, $annotation);
         }
 
         $this->assertEquals(2, $count);

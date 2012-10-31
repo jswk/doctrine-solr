@@ -1,5 +1,11 @@
 <?php
 namespace Doctrine\Solr\Metadata;
+
+/**
+ * Container for class metadata.
+ *
+ * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
+ */
 class DocumentMetadata implements ClassMetadata
 {
     private $collection;
@@ -8,21 +14,35 @@ class DocumentMetadata implements ClassMetadata
 
     private $fields = array();
 
+    /**
+     *
+     * @param string $name
+     */
     public function __construct(string $name)
     {
         $this->name = $name;
     }
 
+    /**
+     * Adds a new field to metadata.
+     * Cannot change existing fields and must contain 'name' and 'type' keys.
+     *
+     * @param array $field
+     * @throws InvalidArgumentException
+     */
     public function addField(array $field)
     {
+        if (!isset($field['type']) || !isset($field['name'])) {
+            throw new InvalidArgumentException("Field must contain both 'name' and 'type' keys");
+        }
+
         $name = $field['name'];
         unset($field['name']);
+
         if ($this->hasField($name)) {
             throw new InvalidArgumentException("Can't edit field information");
         }
-        if (!isset($field['type'])) {
-            throw new InvalidArgumentException("Field must contain type key");
-        }
+
         $allowedTags = array('type', 'uniqueKey');
         $this->fields[$name] = array_intersect_key($field, $allowedTags);
     }
@@ -32,6 +52,10 @@ class DocumentMetadata implements ClassMetadata
         return $this->name;
     }
 
+    /**
+     * Returns info about the collection.
+     * @return string
+     */
     public function getCollection()
     {
         return $this->collection;

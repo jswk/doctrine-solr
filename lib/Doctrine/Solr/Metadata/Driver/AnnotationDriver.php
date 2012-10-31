@@ -1,17 +1,15 @@
 <?php
 namespace Doctrine\Solr\Metadata\Driver;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-
+use Doctrine\Solr\Metadata\ClassMetadata;
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\Common\Persistence\Mapping\Driver\AnnotationDriver as BaseAnnotationDriver;
 use Doctrine\Solr\Mapping\Annotations as SOLR;
 
 /**
  *
  * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
  */
-class AnnotationDriver extends BaseAnnotationDriver
+class AnnotationDriver implements MappingDriver
 {
     protected $entityAnnotationClasses = array(
         "Doctrine\\Solr\\Mapping\\Annotations\\Document" => 1,
@@ -25,9 +23,6 @@ class AnnotationDriver extends BaseAnnotationDriver
         AnnotationRegistry::registerAutoloadNamespace("Doctrine\\Solr\\Mapping\\Annotations", __DIR__.'/../Mapping/Annotation/');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function loadMetadataForClass($className, ClassMetadata $class)
     {
         /** @var $reflClass ReflectionClass */
@@ -41,25 +36,33 @@ class AnnotationDriver extends BaseAnnotationDriver
                     continue 2;
                 }
             }
-
-            // non-document class annotations
         }
 
         if (!$documentAnnots) {
-            // TODO: throw specialized exception
+            throw new NoSolrDocumentAnnotationException();
         }
 
         ksort($documentAnnots);
         $documentAnnot = reset($documentAnnots);
 
         foreach ($reflClass->getProperties() as $property) {
-            $mapping = null;
+            $mapping = array();
 
             foreach ($this->reader->getPropertyAnnotations($property) as $annot) {
                 if ($annot instanceof SOLR\Field) {
-                    $mapping = array(
-                        'fieldName' => $property->getName(),
-                        'type' => $annot->type,
+                    $mapping = array_merge(
+                        $mapping,
+                        array(
+                            'name' => $property->getName(),
+                            'type' => $annot->type,
+                        )
+                    );
+                } elseif ($annot instanceof SOLR\UniqueKey) {
+                    $mapping = array_merge(
+                        $mapping,
+                        array(
+                            'uniqueKey' => true,
+                        )
                     );
                 }
                 // TODO: add more Annotations
