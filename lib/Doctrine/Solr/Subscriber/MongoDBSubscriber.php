@@ -7,8 +7,7 @@ use \Doctrine\ODM\MongoDB\Event\PostFlushEventArgs;
 use \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use \Doctrine\ODM\MongoDB\Events;
 use \Doctrine\ODM\MongoDB\DocumentManager;
-use \Doctrine\Solr\Document\SolrDocument;
-use \Doctrine\Solr\Persistence\MongoDBPersister;
+use \Doctrine\Solr\Persistence\Persister;
 use \Solarium_Document_ReadWrite as SolrDocument;
 
 /**
@@ -19,20 +18,26 @@ class MongoDBSubscriber implements EventSubscriber
 {
     /**
      *
-     * @var \Doctrine\Solr\Persistence\SolrPersister
+     * @var \Doctrine\Solr\Persistence\Persister
      */
     private $persister;
 
     /**
+     *
+     * @param Persister $persister
+     */
+    public function __construct(Persister $persister = null)
+    {
+        $this->persister = $persister;
+    }
+
+    /**
      * Fetches a persister
      *
-     * @return \Doctrine\Solr\Persistence\SolrPersister
+     * @return \Doctrine\Solr\Persistence\Persister
      */
     protected function getPersister()
     {
-        if ($this->persister == null) {
-            $this->persister = new MongoDBPersister();
-        }
         return $this->persister;
     }
 

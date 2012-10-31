@@ -3,6 +3,12 @@ namespace Doctrine\Solr\Persistence;
 
 use \Solarium_Client;
 
+/**
+ * Provides methods to modify Solr database.
+ *
+ * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
+ *
+ */
 class SolrPersister implements Persister
 {
     /**
@@ -26,6 +32,7 @@ class SolrPersister implements Persister
     protected $client;
 
     /**
+     * Returns Solarium_Client object
      *
      * @return \Solarium_Client
      */
@@ -37,18 +44,28 @@ class SolrPersister implements Persister
         return $this->client;
     }
     /**
+     * Holds config
+     *
      * @var array
      */
     protected $config;
 
     /**
+     * Returns config
      *
      * @return array
      */
     protected function getConfig()
     {
         if ($this->config == null) {
-            $this->config = array(); // TODO: implement config reading
+            $this->config = array(
+                'adapteroptions' => array(
+                    'host' => '127.0.0.1',
+                    'port' => 8983,
+                    'path' => '/solr/',
+                )
+            );
+            // TODO: implement config reading
         }
         return $this->config;
     }
@@ -57,52 +74,110 @@ class SolrPersister implements Persister
      *
      * @return \Doctrine\Solr\Persistence\SolrPersister
      */
-    public function setConfig(array $config, $override = false)
+    protected function setConfig(array $config, $override = false)
     {
-        if ($override) {
-            $this->config = $config;
+        if (!$override) {
+            $this->config = array_merge($config, $this->getConfig());
         } else {
-            $this->config = array_merge($this->config, $config);
+            $this->config = array_merge($this->getConfig(), $config);
         }
-        return $this;
+        return $this->getConfig();
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Doctrine\Solr\Persistence\Persister::persist()
+     * Sets proper config and Client on demand
+     *
+     * @param array $config
+     * @param \Solarium_Client $client
+     */
+    public function __construct(array $config = null, \Solarium_Client $client = null)
+    {
+        $this->setConfig((array) $config, true);
+        $this->client = $client;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function persist(\Solarium_Document_ReadOnly $document)
     {
+        // adds document to the list
         $this->insertUpdate[] = $document;
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function remove(\Solarium_Document_ReadOnly $document)
     {
-        $this->remove[] = $document;
+        // adds document to the list
+        $this->delete[] = $document;
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function update(\Solarium_Document_ReadOnly $document)
     {
-        $this->persist($document);
+        // adds document to the list
+        return $this->persist($document);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flush()
+    {
+        // if nothing to commit, exit
+        if ($this->insertUpdate == array() && $this->delete == array()) {
+            return $this;
+        }
+
+        $client = $this->getSolariumClient();
+
+        $update = $client->createUpdate();
+
+        // if there's something to remove
+        if ($this->delete != array()) {
+            foreach ($this->delete as $doc) {
+                $update->addDeleteQuery($this->documentToQuery($doc));
+            }
+        }
+
+        // if there's something to insert/update
+        if ($this->insertUpdate != array()) {
+            $update->addDocuments($this->insertUpdate);
+        }
+
+        // commit changes to the database, otherwise changes
+        // would wait to be commited
+        $update->addCommit();
+
+        // run the update
+        $result = $client->update($update);
+
+        // something went wrong
+        if ($result->getStatus() != 0) {
+            throw new InvalidArgumentException();
+        }
+
         return $this;
     }
 
-    public function flush()
+    /**
+     * Convert document to delete query
+     *
+     * @param \Solarium_Document_ReadOnly document to be converted
+     * @return string query (i.e. '(id:"15*")AND(title:"Moby Dick")')
+     */
+    private function documentToQuery(\Solarium_Document_ReadOnly $document)
     {
-        $client = $this->getSolariumClient();
-        if ($this->remove != array()) {
-            $update = $client->createUpdate();
-            $update->addDocuments($this->insertUpdate);
-            // FIXME: finish removing documents
+        $query = array();
+        foreach ($document->getIterator() as $key => $value) {
+            $query[] = "(${key}:\"${value}\")";
         }
-        if ($this->insertUpdate != array()) {
-            $update = $client->createUpdate();
-            $update->addDocuments($this->insertUpdate);
-            $update->addCommit();
-            $client->update($update);
-        }
-
+        return implode('AND', $query);
     }
 }

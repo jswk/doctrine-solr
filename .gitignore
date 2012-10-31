@@ -2,9 +2,13 @@
 .settings
 .buildpath
 .project
+.externalToolBuilders
 
 // composer
 composer.phar
 composer.lock
 
 vendor
+report
+docs
+Doxyfile

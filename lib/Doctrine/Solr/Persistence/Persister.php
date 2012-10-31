@@ -28,6 +28,8 @@ interface Persister
     public function update(\Solarium_Document_ReadOnly $document);
 
     /**
+     * Saves the information to the database.
+     * Must be called to actually write to the database.
      *
      * @return \Doctrine\Solr\Persistence\Persister
      */

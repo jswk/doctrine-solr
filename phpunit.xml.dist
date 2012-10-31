@@ -21,4 +21,8 @@
       <directory suffix=".php">./lib/Doctrine/Solr</directory>
     </whitelist>
   </filter>
+  <logging>
+    <log type="coverage-html" target="./report/coverage" charset="UTF-8"
+         highlight="true"/>
+  </logging>
 </phpunit>
