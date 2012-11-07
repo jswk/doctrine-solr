@@ -1,33 +1,30 @@
 <?php
 namespace Doctrine\Solr\Metadata;
 
+use Doctrine\Common\Persistence\Mapping\ClassMetadata as DoctrineClassMetadata;
+
 /**
  * Container for class metadata.
  *
  * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
  */
-class DocumentMetadata implements ClassMetadata
+class DocumentMetadata implements ClassMetadata, DoctrineClassMetadata
 {
     /**
      * These values are derived from schema.xml of Solr collection.
      * @var array
      */
-    private static $allowedFieldTypes = [
-        'string' => '*_s',
-        'text' => '*_t',
-        'int' => '*_i',
-        'long' => '*_l',
-        'float' => '*_f',
-        'double' => '*_d',
-        'date' => '*_dt',
-        'boolean' => '*_b',
-    ];
+    public static $allowedFieldTypes = ['string' => '*_s', 'text' => '*_t',
+            'int' => '*_i', 'long' => '*_l', 'float' => '*_f',
+            'double' => '*_d', 'date' => '*_dt', 'boolean' => '*_b',];
 
-    private $collection;
+    public $collection;
 
-    private $name;
+    public $name;
 
-    private $fields = array();
+    public $fields = array();
+
+    public $reflClass;
 
     /**
      *
@@ -48,7 +45,8 @@ class DocumentMetadata implements ClassMetadata
     public function addField(array $field)
     {
         if (!isset($field['type']) || !isset($field['name'])) {
-            throw new \InvalidArgumentException("Field must contain both 'name' and 'type' keys");
+            throw new \InvalidArgumentException(
+                    "Field must contain both 'name' and 'type' keys");
         }
 
         $name = $field['name'];
@@ -58,8 +56,10 @@ class DocumentMetadata implements ClassMetadata
             throw new \InvalidArgumentException("Can't edit field information");
         }
 
-        if (!array_key_exists((string) $field['type'], $this::$allowedFieldTypes)) {
-            throw new \InvalidArgumentException("Field type " . $field['type'] . " isn't allowed");
+        if (!array_key_exists((string) $field['type'],
+                $this::$allowedFieldTypes)) {
+            throw new \InvalidArgumentException(
+                    "Field type " . $field['type'] . " isn't allowed");
         }
 
         $allowedTags = array('type' => 1, 'uniqueKey' => 1);
@@ -125,14 +125,12 @@ class DocumentMetadata implements ClassMetadata
     public function getSolrFieldName($fieldName)
     {
         if (!$this->hasField($fieldName)) {
-            throw new \InvalidArgumentException('Cannot get name of non existent field.');
+            throw new \InvalidArgumentException(
+                    'Cannot get name of non existent field.');
         }
 
-        return str_replace(
-            '*',
-            $fieldName,
-            $this::$allowedFieldTypes[$this->getTypeOfField($fieldName)]
-        );
+        return str_replace('*', $fieldName,
+                $this::$allowedFieldTypes[$this->getTypeOfField($fieldName)]);
     }
 
     /**
@@ -140,8 +138,8 @@ class DocumentMetadata implements ClassMetadata
      */
     public function getTypeOfField($fieldName)
     {
-        return $this->hasField($fieldName) ?
-               $this->getField($fieldName)['type'] : null;
+        return $this->hasField($fieldName) ? $this
+                        ->getField($fieldName)['type'] : null;
     }
 
     /**
@@ -150,11 +148,11 @@ class DocumentMetadata implements ClassMetadata
     public function isUniqueKey($fieldName)
     {
         $field = $this->getField($fieldName);
-        return isset($field['uniqueKey']) ?
-               $field['uniqueKey'] : false;
-        return $this->hasField($fieldName) ?
-               ((isset($this->fields[$fieldName]['uniqueKey'])) ?
-               (bool) $this->fields[$fieldName]['uniqueKey'] : false) : null;
+        return isset($field['uniqueKey']) ? $field['uniqueKey'] : false;
+        return $this->hasField($fieldName) ? ((isset(
+                        $this->fields[$fieldName]['uniqueKey'])) ? (bool) $this
+                                ->fields[$fieldName]['uniqueKey'] : false)
+                : null;
 
     }
 
@@ -163,7 +161,7 @@ class DocumentMetadata implements ClassMetadata
      * @param string $fieldName
      * @return array
      */
-    private function getField($fieldName)
+    public function getField($fieldName)
     {
         if ($this->hasField($fieldName)) {
             return $this->fields[$fieldName];
@@ -172,4 +170,70 @@ class DocumentMetadata implements ClassMetadata
         }
     }
 
+    /**
+     * @return array
+     */
+    public function __sleep()
+    {
+        return array(
+            'collection',
+            'fields',
+            'name',
+        );
+    }
+
+    public function getIdentifier()
+    {
+        return array();
+    }
+
+    public function isIdentifier($fieldName)
+    {
+        return false;
+    }
+
+    public function hasAssociation($fieldName)
+    {
+        return false;
+    }
+
+    public function isSingleValuedAssociation($fieldName)
+    {
+        return false;
+    }
+
+    public function isCollectionValuedAssociation($fieldName)
+    {
+        return false;
+    }
+
+    public function getAssociationNames()
+    {
+        return array();
+    }
+
+    public function getAssociationTargetClass($assocName)
+    {
+        return '';
+    }
+
+    public function isAssociationInverseSide($assocName)
+    {
+        return '';
+    }
+
+    public function getAssociationMappedByTargetField($assocName)
+    {
+        return '';
+    }
+
+    public function getIdentifierValues($object)
+    {
+        // TODO: Auto-generated method stub
+    }
+
+    public function getIdentifierFieldNames()
+    {
+        // TODO: Auto-generated method stub
+    }
 }
