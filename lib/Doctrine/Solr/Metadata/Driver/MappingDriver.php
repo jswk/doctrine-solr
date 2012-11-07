@@ -1,6 +1,8 @@
 <?php
 namespace Doctrine\Solr\Metadata\Driver;
 
+use Doctrine\Solr\Metadata\ClassMetadata;
+
 /**
  * Interface for Solr Mapping Driver.
  *

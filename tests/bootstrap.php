@@ -9,8 +9,10 @@ $loader->add('Doctrine\\Solr\\Tests', __DIR__);
 use \Doctrine\Common\Annotations\AnnotationRegistry;
 use \Doctrine\Common\EventManager;
 use \Doctrine\Solr\Subscriber\MongoDBSubscriber;
+use \Doctrine\Solr\Metadata\Driver\AnnotationDriver;
 
-AnnotationRegistry::registerAutoloadNamespace("Doctrine\\Solr\\Mapping\\Annotations", __DIR__.'/../lib/');
+
+AnnotationDriver::registerAnnotationClasses();
 AnnotationRegistry::registerFile(__DIR__ . '/../vendor/doctrine/mongodb-odm/lib/Doctrine/ODM/MongoDB/Mapping/Annotations/DoctrineAnnotations.php');
 
 $em = new EventManager();

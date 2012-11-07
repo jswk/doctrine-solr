@@ -36,6 +36,14 @@ interface ClassMetadata
     function getFieldNames();
 
     /**
+     * Solr format field name.
+     *
+     * @param string $fieldName
+     * @return array<string>
+     */
+    function getSolrFieldName($fieldName);
+
+    /**
      * Returns type of the field.
      *
      * @return string
