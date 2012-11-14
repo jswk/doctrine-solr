@@ -42,7 +42,7 @@ class AnnotationTest extends PHPUnit_Framework_TestCase
         $this->assertEquals("test", $annotation->collection);
 
         $count = 0;
-        foreach($class->getProperties() as $property) {
+        foreach ($class->getProperties() as $property) {
             $annotation = $this->reader->getPropertyAnnotation($property, $this->fieldAnnotation);
             if ($annotation == null) {
                 continue;

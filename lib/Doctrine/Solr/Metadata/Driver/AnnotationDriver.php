@@ -1,37 +1,23 @@
 <?php
 namespace Doctrine\Solr\Metadata\Driver;
 
-use Doctrine\Common\Annotations\Reader;
+use Doctrine\Common\Persistence\Mapping\Driver\AnnotationDriver as DoctrineAnnotationDriver;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Solr\Mapping\Annotations as SOLR;
 use Doctrine\Solr\Metadata\DocumentMetadata;
-use Doctrine\Solr\Metadata\ClassMetadata;
 
 /**
  * Designed to load metadata into DocumentMetadata container.
  *
  * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
  */
-class AnnotationDriver implements MappingDriver
+class AnnotationDriver extends DoctrineAnnotationDriver
 {
     protected $entityAnnotationClasses = array(
         "Doctrine\\Solr\\Mapping\\Annotations\\Document" => 1,
     );
-
-    /**
-     * The Reader.
-     *
-     * @var Reader
-     */
-    protected $reader;
-
-    /**
-     * @param Reader $reader
-     */
-    public function __construct(Reader $reader)
-    {
-        $this->reader = $reader;
-    }
 
     /**
      * Registers Annotations namespace for bootstrapping.
@@ -46,7 +32,9 @@ class AnnotationDriver implements MappingDriver
     {
         if (!($class instanceof DocumentMetadata)) {
             throw new \InvalidArgumentException(
-                "\$class param must be a DocumentMetadata object " . (new \ReflectionClass($class))->getName() . " given"
+                "\$class param must be a DocumentMetadata object " .
+                (new \ReflectionClass($class))->getName() .
+                " given"
             );
         }
 
@@ -101,5 +89,12 @@ class AnnotationDriver implements MappingDriver
                 $class->addField($mapping);
             }
         }
+    }
+
+    /** @override */
+    public function isTransient($className)
+    {
+        // TODO: change if transient annotations would be introduced
+        return false;
     }
 }

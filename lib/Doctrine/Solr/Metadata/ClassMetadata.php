@@ -2,53 +2,24 @@
 
 namespace Doctrine\Solr\Metadata;
 
-interface ClassMetadata
+use Doctrine\Common\Persistence\Mapping\ClassMetadata as BaseClassMetadata;
+
+interface ClassMetadata extends BaseClassMetadata
 {
-    /**
-     * Get fully-qualified class name of this persistent class.
-     *
-     * @return string
-     */
-    function getName();
-
-    /**
-     * Gets the ReflectionClass instance for this mapped class.
-     *
-     * @return \ReflectionClass
-     */
-    function getReflectionClass();
-
-    /**
-     * Checks whether the class has field.
-     *
-     * @param string $fieldName
-     * @return boolean
-     */
-    function hasField($fieldName);
-
-    /**
-     * Field names of this class.
-     *
-     * Names aren't converted to Solr format.
-     *
-     * @return array<string>
-     */
-    function getFieldNames();
-
     /**
      * Solr format field name.
      *
      * @param string $fieldName
      * @return array<string>
      */
-    function getSolrFieldName($fieldName);
+    public function getSolrFieldName($fieldName);
 
     /**
      * Returns type of the field.
      *
      * @return string
      */
-    function getTypeOfField($fieldName);
+    public function getTypeOfField($fieldName);
 
     /**
      * Returns if field should be unique
@@ -56,5 +27,5 @@ interface ClassMetadata
      * @param string $fieldName
      * @return boolean
      */
-    function isUniqueKey($fieldName);
+    public function isUniqueKey($fieldName);
 }

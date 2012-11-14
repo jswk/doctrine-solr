@@ -1,5 +1,6 @@
 <?php
 namespace Doctrine\Solr\Mapping;
+
 use Doctrine\Solr\Mapping\BaseAnnotation;
 
 /**
@@ -18,7 +19,9 @@ abstract class PropertyAnnotation extends BaseAnnotation
     {
         foreach ((array) $obligatory as $field) {
             if (!isset($options[$field])) {
-                throw new \InvalidArgumentException(sprintf("Property '%s' must be defined on annotation '%s'", $field,  get_class($this)));
+                throw new \InvalidArgumentException(
+                    sprintf("Property '%s' must be defined on annotation '%s'", $field, get_class($this))
+                );
             }
         }
 

@@ -42,7 +42,10 @@ class AnnotationDriverTest extends PHPUnit_Framework_TestCase
      */
     public function testLoadMetadataThrowsExceptionIfClassMetadataNotSupported()
     {
-        $this->driver->loadMetadataForClass($this->className, new UnsupportedClassMetadata());
+        $this->driver->loadMetadataForClass(
+            $this->className,
+            new UnsupportedClassMetadata()
+        );
     }
 }
 
@@ -67,6 +70,39 @@ class UnsupportedClassMetadata implements ClassMetadata
     {
     }
     public function isUniqueKey($fieldName)
+    {
+    }
+    public function getIdentifier()
+    {
+    }
+    public function isIdentifier($fieldName)
+    {
+    }
+    public function hasAssociation($fieldName)
+    {
+    }
+    public function isSingleValuedAssociation($fieldName)
+    {
+    }
+    public function isCollectionValuedAssociation($fieldName)
+    {
+    }
+    public function getAssociationNames()
+    {
+    }
+    public function getAssociationTargetClass($assocName)
+    {
+    }
+    public function isAssociationInverseSide($assocName)
+    {
+    }
+    public function getAssociationMappedByTargetField($assocName)
+    {
+    }
+    public function getIdentifierValues($object)
+    {
+    }
+    public function getIdentifierFieldNames()
     {
     }
 }

@@ -1,22 +1,27 @@
 <?php
 namespace Doctrine\Solr\Metadata;
 
-use Doctrine\Common\Persistence\Mapping\ClassMetadata as DoctrineClassMetadata;
-
 /**
  * Container for class metadata.
  *
  * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
  */
-class DocumentMetadata implements ClassMetadata, DoctrineClassMetadata
+class DocumentMetadata implements ClassMetadata
 {
     /**
      * These values are derived from schema.xml of Solr collection.
      * @var array
      */
-    public static $allowedFieldTypes = ['string' => '*_s', 'text' => '*_t',
-            'int' => '*_i', 'long' => '*_l', 'float' => '*_f',
-            'double' => '*_d', 'date' => '*_dt', 'boolean' => '*_b',];
+    public static $allowedFieldTypes = [
+        'string' => '*_s',
+        'text' => '*_t',
+        'int' => '*_i',
+        'long' => '*_l',
+        'float' => '*_f',
+        'double' => '*_d',
+        'date' => '*_dt',
+        'boolean' => '*_b',
+    ];
 
     public $collection;
 
@@ -46,7 +51,8 @@ class DocumentMetadata implements ClassMetadata, DoctrineClassMetadata
     {
         if (!isset($field['type']) || !isset($field['name'])) {
             throw new \InvalidArgumentException(
-                    "Field must contain both 'name' and 'type' keys");
+                "Field must contain both 'name' and 'type' keys"
+            );
         }
 
         $name = $field['name'];
@@ -56,10 +62,13 @@ class DocumentMetadata implements ClassMetadata, DoctrineClassMetadata
             throw new \InvalidArgumentException("Can't edit field information");
         }
 
-        if (!array_key_exists((string) $field['type'],
-                $this::$allowedFieldTypes)) {
+        if (!array_key_exists(
+            (string) $field['type'],
+            $this::$allowedFieldTypes
+        )) {
             throw new \InvalidArgumentException(
-                    "Field type " . $field['type'] . " isn't allowed");
+                "Field type " . $field['type'] . " isn't allowed"
+            );
         }
 
         $allowedTags = array('type' => 1, 'uniqueKey' => 1);
@@ -126,11 +135,15 @@ class DocumentMetadata implements ClassMetadata, DoctrineClassMetadata
     {
         if (!$this->hasField($fieldName)) {
             throw new \InvalidArgumentException(
-                    'Cannot get name of non existent field.');
+                'Cannot get name of non existent field.'
+            );
         }
 
-        return str_replace('*', $fieldName,
-                $this::$allowedFieldTypes[$this->getTypeOfField($fieldName)]);
+        return str_replace(
+            '*',
+            $fieldName,
+            $this::$allowedFieldTypes[$this->getTypeOfField($fieldName)]
+        );
     }
 
     /**
@@ -138,8 +151,8 @@ class DocumentMetadata implements ClassMetadata, DoctrineClassMetadata
      */
     public function getTypeOfField($fieldName)
     {
-        return $this->hasField($fieldName) ? $this
-                        ->getField($fieldName)['type'] : null;
+        return $this->hasField($fieldName) ?
+               $this->getField($fieldName)['type'] : null;
     }
 
     /**
@@ -149,15 +162,12 @@ class DocumentMetadata implements ClassMetadata, DoctrineClassMetadata
     {
         $field = $this->getField($fieldName);
         return isset($field['uniqueKey']) ? $field['uniqueKey'] : false;
-        return $this->hasField($fieldName) ? ((isset(
-                        $this->fields[$fieldName]['uniqueKey'])) ? (bool) $this
-                                ->fields[$fieldName]['uniqueKey'] : false)
-                : null;
 
     }
 
     /**
      * Returns information about field.
+     * If field doesn't exist returns empty array.
      * @param string $fieldName
      * @return array
      */
@@ -229,11 +239,11 @@ class DocumentMetadata implements ClassMetadata, DoctrineClassMetadata
 
     public function getIdentifierValues($object)
     {
-        // TODO: Auto-generated method stub
+        // TODO: DocumentMetadata identifier values
     }
 
     public function getIdentifierFieldNames()
     {
-        // TODO: Auto-generated method stub
+        // TODO: DocumentMetadata identifier field names
     }
 }
