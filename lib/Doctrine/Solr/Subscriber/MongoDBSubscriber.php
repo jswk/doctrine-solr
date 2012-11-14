@@ -8,6 +8,7 @@ use \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use \Doctrine\ODM\MongoDB\Events;
 use \Doctrine\ODM\MongoDB\DocumentManager;
 use \Doctrine\Solr\Persistence\Persister;
+use \Doctrine\Solr\Metadata\ClassMetadataFactory;
 use \Solarium_Document_ReadWrite as SolrDocument;
 
 /**
@@ -16,19 +17,20 @@ use \Solarium_Document_ReadWrite as SolrDocument;
  */
 class MongoDBSubscriber implements EventSubscriber
 {
-    /**
-     *
-     * @var \Doctrine\Solr\Persistence\Persister
-     */
-    private $persister;
+    /** @var \Doctrine\Solr\Persistence\Persister */
+    private final $persister;
+
+    /** @var \Doctrine\Solr\Converter\Converter */
+    private final $converter;
 
     /**
      *
      * @param Persister $persister
      */
-    public function __construct(Persister $persister = null)
+    public function __construct(Persister $persister, Converter $converter)
     {
         $this->persister = $persister;
+        $this->converter = $converter;
     }
 
     /**
@@ -39,6 +41,16 @@ class MongoDBSubscriber implements EventSubscriber
     protected function getPersister()
     {
         return $this->persister;
+    }
+
+    /**
+     * Fetches a ClassMetadataFactory associated with the object.
+     *
+     * @return \Doctrine\Solr\Metadata\ClassMetadataFactory
+     */
+    protected function getClassMetadataFactory()
+    {
+        return $this->cmf;
     }
 
     public function getSubscribedEvents()
@@ -57,19 +69,17 @@ class MongoDBSubscriber implements EventSubscriber
      */
     public function postFlush(PostFlushEventArgs $eventArgs)
     {
-        /** @var Doctrine\ODM\MongoDB\DocumentManager */
-        $dm = $eventArgs->getDocumentManager();
-
-        //$dm->
+        $this->getPersister()->flush();
     }
 
+    /**
+     * Persists document, converting it to Solr_Document.
+     * @param LifecycleEventArgs $eventArgs
+     */
     public function postPersist(LifecycleEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
-        $metadata = ''; // TODO: metadata
-        // TODO: load metadata for class
-        // TODO: translate it to a SolrDocument
-        // TODO: save information in the Solr database
+        $solrDocument = $this->converter->getConverted($document);
         $this->getPersister()->persist($solrDocument);
     }
 
