@@ -1,6 +1,7 @@
 <?php
 namespace Doctrine\Solr\Persistence;
 
+use Doctrine\Solr\Configuration;
 use \Solarium_Client;
 
 /**
@@ -32,6 +33,23 @@ class SolrPersister implements Persister
     protected $client;
 
     /**
+     * Holds config
+     *
+     * @var Doctrine\Solr\Configuration
+     */
+    protected $config;
+
+    /**
+     * Returns config
+     *
+     * @return Configuration
+     */
+    protected function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
      * Returns Solarium_Client object
      *
      * @return \Solarium_Client
@@ -39,49 +57,9 @@ class SolrPersister implements Persister
     protected function getSolariumClient()
     {
         if ($this->client == null) {
-            $this->client = new Solarium_Client($this->getConfig());
+            $this->client = $this->getConfig()->getSolariumClientImpl();
         }
         return $this->client;
-    }
-    /**
-     * Holds config
-     *
-     * @var array
-     */
-    protected $config;
-
-    /**
-     * Returns config
-     *
-     * @return array
-     */
-    protected function getConfig()
-    {
-        if ($this->config == null) {
-            $this->config = array(
-                'adapteroptions' => array(
-                    'host' => '127.0.0.1',
-                    'port' => 8983,
-                    'path' => '/solr/',
-                )
-            );
-            // TODO: implement config reading
-        }
-        return $this->config;
-    }
-
-    /**
-     *
-     * @return \Doctrine\Solr\Persistence\SolrPersister
-     */
-    protected function setConfig(array $config, $override = false)
-    {
-        if (!$override) {
-            $this->config = array_merge($config, $this->getConfig());
-        } else {
-            $this->config = array_merge($this->getConfig(), $config);
-        }
-        return $this->getConfig();
     }
 
     /**
@@ -90,10 +68,9 @@ class SolrPersister implements Persister
      * @param array $config
      * @param \Solarium_Client $client
      */
-    public function __construct(array $config = null, \Solarium_Client $client = null)
+    public function __construct(Configuration $config)
     {
-        $this->setConfig((array) $config, true);
-        $this->client = $client;
+        $this->config = $config;
     }
 
     /**
@@ -160,7 +137,7 @@ class SolrPersister implements Persister
 
         // something went wrong
         if ($result->getStatus() != 0) {
-            throw new InvalidArgumentException();
+            throw new \UnexpectedValueException("Solarium Client returned error: " . $result->getStatus());
         }
 
         return $this;

@@ -5,28 +5,68 @@ use \Doctrine\Solr\Metadata\Driver\MappingDriver;
 
 class Configuration
 {
-    private $metadataDriverImplClosure;
-    private $metadataDriverImpl;
+    private $attributes = array();
+
+    private $closures = array();
+
+    private function getAttribute($name)
+    {
+        if (!isset($this->attributes[$name])) {
+            if (!isset($this->closures[$name])) {
+                throw new \BadMethodCallException("Option " . $name . "hasn't been set.");
+            }
+            $this->attributes[$name] = $this->closures[$name]();
+        }
+        return $this->attributes[$name];
+    }
+
+    private function setAttribute($name, $val)
+    {
+        $this->attributes[$name] = $val;
+    }
+
+    private function setAttributeClosure($name, $closure)
+    {
+        $this->closures[$name] = $closure;
+    }
 
     /**
      * Sets metadata driver closure.
      *
-     * @param callable $driver must return a MappingDriver instance.
+     * @param callable $driver should return a MappingDriver instance.
      */
     public function setMetadataDriverImpl(callable $driver)
     {
-        $this->metadataDriverImplClosure = $driver;
+        $this->setAttributeClosure('metadataDriverImpl', $driver);
     }
 
     /**
-     * Returns metadata driver
+     * Returns metadata driver.
+     *
      * @return MappingDriver
      */
     public function getMetadataDriverImpl()
     {
-        if ($this->metadataDriverImpl == null) {
-            $this->metadataDriverImpl = $this->metadataDriverImplClosure();
-        }
-        return $this->metadataDriverImpl;
+        return $this->getAttribute('metadataDriverImpl');
+    }
+
+    /**
+     * Sets solarium client closure.
+     *
+     * @param callable $client should return a Solarium_Client instance.
+     */
+    public function setSolariumClientImpl(callable $client)
+    {
+        $this->setAttributeClosure('solariumClientImpl', $client);
+    }
+
+    /**
+     * Returns solarium client.
+     *
+     * @return Solarium_Client
+     */
+    public function getSolariumClientImpl()
+    {
+        return $this->getAttribute('solariumClientImpl');
     }
 }

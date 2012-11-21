@@ -52,7 +52,9 @@ class AnnotationDriver extends DoctrineAnnotationDriver
         }
 
         if (!$documentAnnots) {
-            throw new NoSolrDocumentAnnotationException();
+            throw new \InvalidArgumentException(
+                "Class " . $class->getName() . " must have DocumentSolr annotation."
+            );
         }
 
         ksort($documentAnnots);

@@ -47,6 +47,20 @@ class AnnotationDriverTest extends PHPUnit_Framework_TestCase
             new UnsupportedClassMetadata()
         );
     }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testLoadMetadataThrowsInvalidArgumentExceptionIfDocumentNotSolrSupported()
+    {
+        $dm = new DocumentMetadata("NoAnnotataionClass");
+        $dm->reflClass = new \ReflectionClass(new NoAnnotationClass());
+
+        $this->driver->loadMetadataForClass(
+            '',
+            $dm
+        );
+    }
 }
 
 class UnsupportedClassMetadata implements ClassMetadata
@@ -105,4 +119,9 @@ class UnsupportedClassMetadata implements ClassMetadata
     public function getIdentifierFieldNames()
     {
     }
+}
+
+class NoAnnotationClass
+{
+
 }
