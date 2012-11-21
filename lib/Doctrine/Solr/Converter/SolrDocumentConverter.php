@@ -15,6 +15,12 @@ class SolrDocumentConverter implements Converter
         $this->cmf = $cmf;
     }
 
+    /**
+     * Returns converted $document
+     *
+     * @param Object $document with direct access to fields i.e. $document->field
+     * @return \Solarium_Document_ReadOnly
+     */
     public function getConverted($document)
     {
         /** @var $metadata DocumentMetadata */
@@ -27,6 +33,5 @@ class SolrDocumentConverter implements Converter
         }
 
         return $converted;
-
     }
 }

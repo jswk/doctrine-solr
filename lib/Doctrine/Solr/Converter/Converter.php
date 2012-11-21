@@ -12,6 +12,7 @@ interface Converter
      * Returns converted object.
      *
      * @param $document
+     * @return converted object
      */
     public function getConverted($document);
 }

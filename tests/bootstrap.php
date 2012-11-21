@@ -19,4 +19,4 @@ AnnotationRegistry::registerFile(
 
 $em = new EventManager();
 
-$em->addEventSubscriber(new MongoDBSubscriber);
+//$em->addEventSubscriber(new MongoDBSubscriber);

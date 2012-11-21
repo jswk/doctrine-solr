@@ -1,6 +1,7 @@
 <?php
 namespace Doctrine\Solr\Tests\Metadata;
 
+use Doctrine\Solr\Configuration;
 use Doctrine\Solr\Metadata\DocumentMetadata;
 use Doctrine\Solr\Tests\Mock\MappingDriverMock;
 use PHPUnit_Framework_TestCase;
@@ -28,8 +29,17 @@ class ClassMetadataFactoryTest extends PHPUnit_Framework_TestCase
             ]
         );
 
-        $cmf = new ClassMetadataFactoryTestSubject();
-        $cmf->setMetadataFor(
+        $driver = $this->getMock('Doctrine\\Solr\\Metadata\\Driver\\AnnotationDriver', [], [], '', false);
+        $driver->expects($this->once())
+               ->method('loadMetadataForClass');
+
+        $config = $this->getMock('Doctrine\\Solr\\Configuration', [], [], '', false);
+        $config->expects($this->once())
+               ->method('getMetadataDriverImpl')
+               ->will($this->returnValue($driver));
+
+        $cmf = new ClassMetadataFactoryTestSubject($config);
+        $cmf->setMetadataForClass(
             'Doctrine\\Solr\\Tests\\Mapping\\Document1',
             $cm
         );

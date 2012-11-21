@@ -1,11 +1,11 @@
 <?php
-
 namespace Doctrine\Solr\Metadata;
 
 use Doctrine\Common\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as DoctrineClassMetadata;
 use Doctrine\Common\Persistence\Mapping\ReflectionService;
 use Doctrine\Solr\Metadata\Driver\AnnotationDriver;
+use Doctrine\Solr\Configuration;
 
 /**
  *
@@ -21,6 +21,16 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
     /** @var \Doctrine\Solr\Configuration The Configuration instance */
     private $config;
+
+    /**
+     * Sets the configuration.
+     *
+     * @param Configuration $config
+     */
+    public function __construct(Configuration $config)
+    {
+        $this->config = $config;
+    }
 
     /**
      * {inherit-doc}
@@ -82,7 +92,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         /** @var $class DocumentMetadata */
 
         try {
-            $this->driver->loadMetadataForClass($class->getName(), $class);
+            $this->getDriver()->loadMetadataForClass($class->getName(), $class);
         } catch (\ReflectionException $e) {
             throw new Exception(
                 "Error occurred while reading reflection from " . $class->getName(),

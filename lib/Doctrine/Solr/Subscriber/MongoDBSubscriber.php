@@ -10,18 +10,21 @@ use \Doctrine\ODM\MongoDB\DocumentManager;
 use \Doctrine\Solr\Persistence\Persister;
 use \Doctrine\Solr\Metadata\ClassMetadataFactory;
 use \Solarium_Document_ReadWrite as SolrDocument;
+use \Doctrine\Solr\Converter\Converter;
 
 /**
+ * Connects MongoDB and Solr.
+ * Should be added as an EventManager's subscriber.
  *
  * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
  */
 class MongoDBSubscriber implements EventSubscriber
 {
     /** @var \Doctrine\Solr\Persistence\Persister */
-    private final $persister;
+    private $persister;
 
     /** @var \Doctrine\Solr\Converter\Converter */
-    private final $converter;
+    private $converter;
 
     /**
      *
@@ -44,13 +47,13 @@ class MongoDBSubscriber implements EventSubscriber
     }
 
     /**
-     * Fetches a ClassMetadataFactory associated with the object.
+     * Fetches a converter
      *
-     * @return \Doctrine\Solr\Metadata\ClassMetadataFactory
+     * @return \Doctrine\Solr\Converter\Converter
      */
-    protected function getClassMetadataFactory()
+    protected function getConverter()
     {
-        return $this->cmf;
+        return $this->converter;
     }
 
     public function getSubscribedEvents()
@@ -78,18 +81,29 @@ class MongoDBSubscriber implements EventSubscriber
      */
     public function postPersist(LifecycleEventArgs $eventArgs)
     {
-        $document = $eventArgs->getDocument();
-        $solrDocument = $this->converter->getConverted($document);
-        $this->getPersister()->persist($solrDocument);
+        $document = $this->convert($eventArgs->getDocument());
+        $this->getPersister()->persist($document);
     }
 
     public function postUpdate(LifecycleEventArgs $eventArgs)
     {
+        $document = $this->convert($eventArgs->getDocument());
         $this->getPersister()->update($document);
     }
 
     public function postRemove(LifecycleEventArgs $eventArgs)
     {
+        $document = $this->convert($eventArgs->getDocument());
         $this->getPersister()->remove($document);
+    }
+
+    /**
+     *
+     * @param Object $document
+     * @return converted object
+     */
+    private function convert($document)
+    {
+        return $this->getConverter()->getConverted($document);
     }
 }
