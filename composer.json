@@ -9,7 +9,7 @@
         "php": ">=5.4.3",
         "doctrine/common": "dev-master",
         "doctrine/mongodb-odm": "dev-master",
-        "solarium/solarium": "dev-master"
+        "solarium/solarium": "3.*"
     },
     "dev-require": {
     },

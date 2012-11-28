@@ -1,8 +1,10 @@
 <?php
 namespace Doctrine\Solr\Persistence;
 
+use Solarium\QueryType\Select\Result\AbstractDocument;
+use Solarium\Client;
+
 use Doctrine\Solr\Configuration;
-use \Solarium_Client;
 
 /**
  * Provides methods to modify Solr database.
@@ -16,19 +18,19 @@ class SolrPersister implements Persister
      * Holds information about changes and inserts to the Solr.
      * Solr implements upsert, so one property is sufficient.
      *
-     * @var array<\Solarium_Document_ReadOnly>
+     * @var array<AbstractDocument>
      */
     protected $insertUpdate = array();
 
     /**
      * Holds information about documents to be deleted
      *
-     * @var array<\Solarium_Document_ReadOnly>
+     * @var array<AbstractDocument>
     */
     protected $delete = array();
 
     /**
-     * @var \Solarium_Client
+     * @var \Solarium\Client
      */
     protected $client;
 
@@ -50,9 +52,9 @@ class SolrPersister implements Persister
     }
 
     /**
-     * Returns Solarium_Client object
+     * Returns Solarium\Client object
      *
-     * @return \Solarium_Client
+     * @return \Solarium\Client
      */
     protected function getSolariumClient()
     {
@@ -66,7 +68,7 @@ class SolrPersister implements Persister
      * Sets proper config and Client on demand
      *
      * @param array $config
-     * @param \Solarium_Client $client
+     * @param \Solarium\Client $client
      */
     public function __construct(Configuration $config)
     {
@@ -76,7 +78,7 @@ class SolrPersister implements Persister
     /**
      * {@inheritdoc}
      */
-    public function persist(\Solarium_Document_ReadOnly $document)
+    public function persist(AbstractDocument $document)
     {
         // adds document to the list
         $this->insertUpdate[] = $document;
@@ -86,7 +88,7 @@ class SolrPersister implements Persister
     /**
      * {@inheritdoc}
      */
-    public function remove(\Solarium_Document_ReadOnly $document)
+    public function remove(AbstractDocument $document)
     {
         // adds document to the list
         $this->delete[] = $document;
@@ -96,7 +98,7 @@ class SolrPersister implements Persister
     /**
      * {@inheritdoc}
      */
-    public function update(\Solarium_Document_ReadOnly $document)
+    public function update(AbstractDocument $document)
     {
         // adds document to the list
         return $this->persist($document);
@@ -119,7 +121,7 @@ class SolrPersister implements Persister
         // if there's something to remove
         if ($this->delete != array()) {
             foreach ($this->delete as $doc) {
-                $update->addDeleteQuery($this->documentToQuery($doc));
+                $update->addDeleteQuery(self::documentToQuery($doc));
             }
         }
 
@@ -146,10 +148,10 @@ class SolrPersister implements Persister
     /**
      * Convert document to delete query
      *
-     * @param \Solarium_Document_ReadOnly document to be converted
+     * @param AbstractDocument document to be converted
      * @return string query (i.e. '(id:"15*")AND(title:"Moby Dick")')
      */
-    private function documentToQuery(\Solarium_Document_ReadOnly $document)
+    private static function documentToQuery(AbstractDocument $document)
     {
         $query = array();
         foreach ($document->getIterator() as $key => $value) {

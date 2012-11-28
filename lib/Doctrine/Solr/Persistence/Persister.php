@@ -1,31 +1,33 @@
 <?php
 namespace Doctrine\Solr\Persistence;
 
+use Solarium\QueryType\Select\Result\AbstractDocument;
+
 interface Persister
 {
     /**
      * Records information about document to be persisted
      *
-     * @param \Solarium_Document_ReadOnly $document
+     * @param AbstractDocument $document
      * @return \Doctrine\Solr\Persistence\Persister
      */
-    public function persist(\Solarium_Document_ReadOnly $document);
+    public function persist(AbstractDocument $document);
 
     /**
      * Records information about document to be removed
      *
-     * @param \Solarium_Document_ReadOnly $document
+     * @param AbstractDocument $document
      * @return \Doctrine\Solr\Persistence\Persister
      */
-    public function remove(\Solarium_Document_ReadOnly $document);
+    public function remove(AbstractDocument $document);
 
     /**
      * Records information about document to be updated
      *
-     * @param \Solarium_Document_ReadOnly $document
+     * @param AbstractDocument $document
      * @return \Doctrine\Solr\Persistence\Persister
      */
-    public function update(\Solarium_Document_ReadOnly $document);
+    public function update(AbstractDocument $document);
 
     /**
      * Saves the information to the database.

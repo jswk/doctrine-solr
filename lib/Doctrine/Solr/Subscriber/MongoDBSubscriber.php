@@ -9,7 +9,6 @@ use \Doctrine\ODM\MongoDB\Events;
 use \Doctrine\ODM\MongoDB\DocumentManager;
 use \Doctrine\Solr\Persistence\Persister;
 use \Doctrine\Solr\Metadata\ClassMetadataFactory;
-use \Solarium_Document_ReadWrite as SolrDocument;
 use \Doctrine\Solr\Converter\Converter;
 
 /**

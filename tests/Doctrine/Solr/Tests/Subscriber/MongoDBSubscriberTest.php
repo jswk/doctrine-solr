@@ -1,11 +1,12 @@
 <?php
 namespace Doctrine\Solr\Tests\Subscriber;
 
-use Doctrine\ODM\MongoDB\Event\PostFlushEventArgs;
+use Solarium\QueryType\Select\Result\Document;
 
+use Doctrine\ODM\MongoDB\Event\PostFlushEventArgs;
 use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Doctrine\Solr\Subscriber\MongoDBSubscriber;
-use Solarium_Document_ReadOnly;
+
 use PHPUnit_Framework_TestCase;
 
 class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
@@ -34,7 +35,7 @@ class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
     {
         $this->converter->expects($this->any())
                         ->method('getConverted')
-                        ->will($this->returnValue(new Solarium_Document_ReadOnly([])));
+                        ->will($this->returnValue(new Document([])));
 
         $this->persister->expects($this->once())
                         ->method('persist');
@@ -48,7 +49,7 @@ class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
     {
         $this->converter->expects($this->any())
                         ->method('getConverted')
-                        ->will($this->returnValue(new Solarium_Document_ReadOnly([])));
+                        ->will($this->returnValue(new Document([])));
 
         $this->persister->expects($this->once())
                         ->method('update');
@@ -62,7 +63,7 @@ class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
     {
         $this->converter->expects($this->any())
                         ->method('getConverted')
-                        ->will($this->returnValue(new Solarium_Document_ReadOnly([])));
+                        ->will($this->returnValue(new Document([])));
 
         $this->persister->expects($this->once())
                         ->method('remove');

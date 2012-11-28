@@ -2,7 +2,10 @@
 
 namespace Doctrine\Solr\Tests\Persistence;
 
+use Solarium\QueryType\Select\Result\Document;
+
 use Doctrine\Solr\Persistence\SolrPersister;
+
 use \PHPUnit_Framework_TestCase;
 
 class SolrPersisterTest extends PHPUnit_Framework_TestCase
@@ -13,9 +16,9 @@ class SolrPersisterTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->update = $this->getMock('\Solarium_Query_Update');
+        $this->update = $this->getMock('Solarium\\QueryType\\Update\\Query\\Query');
 
-        $this->client = $this->getMock('\Solarium_Client');
+        $this->client = $this->getMock('Solarium\\Client');
 
         $this->config = $this->getMock('Doctrine\\Solr\\Configuration', [], [], '', false);
         $this->config->expects($this->any())
@@ -25,25 +28,26 @@ class SolrPersisterTest extends PHPUnit_Framework_TestCase
 
     public function testPersistUpdateRemove()
     {
-        $add = new \Solarium_Document_ReadOnly(
+        $add = new Document(
             array(
                 'fieldOne' => 'two',
                 'fieldTwo' => 'seven',
             )
         );
-        $update = new \Solarium_Document_ReadOnly(
+        $update = new Document(
             array(
                 'fieldUp' => 'two',
                 'fieldDown' => 'seven',
             )
         );
-        $remove = new \Solarium_Document_ReadOnly(
+        $remove = new Document(
             array(
                 'id' => 'two',
                 'fieldTwo' => 'seven',
             )
         );
-        $result = $this->getMock('\Solarium_Result_Update', array(), array(), '', false);
+
+        $result = $this->getMock('Solarium\\QueryType\\Update\\Result', array(), array(), '', false);
 
         $this->client->expects($this->once())
                      ->method('createUpdate')
@@ -88,13 +92,13 @@ class SolrPersisterTest extends PHPUnit_Framework_TestCase
      */
     public function testFlushThrowsUnexpectedValueExceptionOnClientError()
     {
-        $add = new \Solarium_Document_ReadOnly(
+        $add = new Document(
             array(
                 'fieldOne' => 'two',
                 'fieldTwo' => 'seven',
             )
         );
-        $result = $this->getMock('\Solarium_Result_Update', array(), array(), '', false);
+        $result = $this->getMock('Solarium\\QueryType\\Update\\Result', array(), array(), '', false);
 
         $this->client->expects($this->once())
                      ->method('createUpdate')

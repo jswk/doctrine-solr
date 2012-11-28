@@ -1,9 +1,9 @@
 <?php
 namespace Doctrine\Solr\Converter;
 
+use Solarium\QueryType\Update\Query\Document;
 use Doctrine\Solr\Metadata\DocumentMetadata;
 use Doctrine\Solr\Metadata\ClassMetadataFactory;
-use Solarium_Document_ReadWrite;
 
 class SolrDocumentConverter implements Converter
 {
@@ -19,14 +19,14 @@ class SolrDocumentConverter implements Converter
      * Returns converted $document
      *
      * @param Object $document with direct access to fields i.e. $document->field
-     * @return \Solarium_Document_ReadOnly
+     * @return \Solarium\QueryType\Update\Query\Document
      */
     public function getConverted($document)
     {
         /** @var $metadata DocumentMetadata */
         $metadata = $this->cmf->getMetadataFor(get_class($document));
 
-        $converted = new Solarium_Document_ReadWrite();
+        $converted = new Document();
 
         foreach ($metadata->getFieldNames() as $fieldName) {
             $converted->addField($metadata->getSolrFieldName($fieldName), $document->$fieldName);
