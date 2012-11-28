@@ -1,7 +1,7 @@
 <?php
 namespace Doctrine\Solr;
 
-abstract class AbstractConfiguration
+abstract class AbstractConfiguration implements IConfiguration
 {
     private $attributes = array();
 
@@ -11,7 +11,7 @@ abstract class AbstractConfiguration
     {
         if (!isset($this->attributes[$name])) {
             if (!isset($this->closures[$name])) {
-                throw new \BadMethodCallException("Option " . $name . "hasn't been set.");
+                throw new \BadMethodCallException("Option " . $name . " hasn't been set.");
             }
             $this->attributes[$name] = $this->closures[$name]();
         }
