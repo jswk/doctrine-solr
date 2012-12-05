@@ -11,34 +11,36 @@ use PHPUnit_Framework_TestCase;
 
 class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
 {
-    public $persister;
+    public $query;
 
-    public $converter;
+    public $client;
 
     public $subscriber;
 
     public function setUp()
     {
-        $this->persister = $this->getMock('Doctrine\\Solr\\Persistence\\SolrPersister', [], [], '', false);
-        $this->converter = $this->getMock('Doctrine\\Solr\\Converter\\SolrDocumentConverter', [], [], '', false);
-        $this->subscriber = new MongoDBSubscriber($this->persister, $this->converter);
+        $this->query = $this->getMock('Doctrine\\Solr\\QueryType\\Update\\Query', [], [], '', false);
+        $this->client = $this->getMock('Solarium\\Client', [], [], '', false);
+        $converter = $this->getMock('Doctrine\\Solr\\Converter\\SolrDocumentConverter', [], [], '', false);
+
+        $this->client->expects($this->once())
+                     ->method('createUpdate')
+                     ->will($this->returnValue($this->query));
+
+        // test subject
+        $this->subscriber = new MongoDBSubscriber($this->client, $converter);
     }
 
     public function tearDown()
     {
-        $this->persister = null;
-        $this->converter = null;
+        $this->query = null;
         $this->subscriber = null;
     }
 
     public function testPersist()
     {
-        $this->converter->expects($this->any())
-                        ->method('getConverted')
-                        ->will($this->returnValue(new Document([])));
-
-        $this->persister->expects($this->once())
-                        ->method('persist');
+        $this->query->expects($this->once())
+                        ->method('addDocument');
 
         $eventArgs = new LifecycleEventArgs(null, null);
 
@@ -47,12 +49,8 @@ class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
 
     public function testUpdate()
     {
-        $this->converter->expects($this->any())
-                        ->method('getConverted')
-                        ->will($this->returnValue(new Document([])));
-
-        $this->persister->expects($this->once())
-                        ->method('update');
+        $this->query->expects($this->once())
+                        ->method('addDocument');
 
         $eventArgs = new LifecycleEventArgs(null, null);
 
@@ -61,12 +59,8 @@ class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
 
     public function testRemove()
     {
-        $this->converter->expects($this->any())
-                        ->method('getConverted')
-                        ->will($this->returnValue(new Document([])));
-
-        $this->persister->expects($this->once())
-                        ->method('remove');
+        $this->query->expects($this->once())
+                        ->method('removeDocument');
 
         $eventArgs = new LifecycleEventArgs(null, null);
 
@@ -75,8 +69,9 @@ class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
 
     public function testFlush()
     {
-        $this->persister->expects($this->once())
-                        ->method('flush');
+        $this->client->expects($this->once())
+                        ->method('execute')
+                        ->with($this->query);
 
         $eventArgs = new MockPostFlushEventArgs();
 

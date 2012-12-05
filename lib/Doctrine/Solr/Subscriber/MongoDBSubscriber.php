@@ -1,6 +1,9 @@
 <?php
 
 namespace Doctrine\Solr\Subscriber;
+use Doctrine\Solr\QueryType\Update\Query;
+
+use Solarium\Client;
 
 use \Doctrine\Common\EventSubscriber;
 use \Doctrine\ODM\MongoDB\Event\PostFlushEventArgs;
@@ -19,40 +22,24 @@ use \Doctrine\Solr\Converter\Converter;
  */
 class MongoDBSubscriber implements EventSubscriber
 {
-    /** @var \Doctrine\Solr\Persistence\Persister */
-    private $persister;
+    /** @var \Solarium\Client */
+    private $client;
 
-    /** @var \Doctrine\Solr\Converter\Converter */
-    private $converter;
+    /** @var \Solarium\QueryType\Update\Query\Query */
+    private $query;
 
     /**
      *
-     * @param Persister $persister
+     * @param Client $client must have its queryTypes updated
+     * @param Converter $converter
+     * @param string $updateOptions
      */
-    public function __construct(Persister $persister, Converter $converter)
+    public function __construct(Client $client, Converter $converter)
     {
-        $this->persister = $persister;
-        $this->converter = $converter;
-    }
-
-    /**
-     * Fetches a persister
-     *
-     * @return \Doctrine\Solr\Persistence\Persister
-     */
-    protected function getPersister()
-    {
-        return $this->persister;
-    }
-
-    /**
-     * Fetches a converter
-     *
-     * @return \Doctrine\Solr\Converter\Converter
-     */
-    protected function getConverter()
-    {
-        return $this->converter;
+        $this->client = $client;
+        $this->query = $client->createUpdate([
+            'converter' => $converter,
+        ]);
     }
 
     public function getSubscribedEvents()
@@ -61,7 +48,7 @@ class MongoDBSubscriber implements EventSubscriber
             Events::postFlush,
             Events::postPersist,
             Events::postRemove,
-            Events::postUpdate,
+            Events::postUpdate
         );
     }
 
@@ -71,7 +58,7 @@ class MongoDBSubscriber implements EventSubscriber
      */
     public function postFlush(PostFlushEventArgs $eventArgs)
     {
-        $this->getPersister()->flush();
+        $this->client->execute($this->query);
     }
 
     /**
@@ -80,29 +67,16 @@ class MongoDBSubscriber implements EventSubscriber
      */
     public function postPersist(LifecycleEventArgs $eventArgs)
     {
-        $document = $this->convert($eventArgs->getDocument());
-        $this->getPersister()->persist($document);
+        $this->query->addDocument($eventArgs->getDocument());
     }
 
     public function postUpdate(LifecycleEventArgs $eventArgs)
     {
-        $document = $this->convert($eventArgs->getDocument());
-        $this->getPersister()->update($document);
+        $this->query->addDocument($eventArgs->getDocument(), true);
     }
 
     public function postRemove(LifecycleEventArgs $eventArgs)
     {
-        $document = $this->convert($eventArgs->getDocument());
-        $this->getPersister()->remove($document);
-    }
-
-    /**
-     *
-     * @param Object $document
-     * @return converted object
-     */
-    private function convert($document)
-    {
-        return $this->getConverter()->getConverted($document);
+        $this->query->removeDocument($eventArgs->getDocument());
     }
 }

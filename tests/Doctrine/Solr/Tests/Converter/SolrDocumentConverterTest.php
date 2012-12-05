@@ -25,7 +25,7 @@ class SolrDocumentConverterTest extends PHPUnit_Framework_TestCase
         $document->id = "34h7834";
         $document->notMapped = "Unimportant";
 
-        $solrDoc = $conv->getConverted($document);
+        $solrDoc = $conv->toSolrDocument($document);
 
         $this->assertEquals($document->name, $solrDoc->name_s);
         $this->assertEquals($document->id, $solrDoc->id_s);

@@ -8,11 +8,7 @@ namespace Doctrine\Solr\Converter;
  */
 interface Converter
 {
-    /**
-     * Returns converted object.
-     *
-     * @param $document
-     * @return converted object
-     */
-    public function getConverted($document);
+    public function toSolrDocument($document);
+    public function toDocument($document);
+    public function toQuery($document);
 }
