@@ -9,5 +9,5 @@ interface IConfiguration
      * @param $conf
      * @return IConfiguration
      */
-    static function fromConfig($conf);
+    static function fromConfig(array $conf);
 }

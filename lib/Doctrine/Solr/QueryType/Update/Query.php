@@ -9,7 +9,7 @@ use Solarium\QueryType\Update\Query\Query as UpdateQuery;
 
 class Query extends UpdateQuery
 {
-    /** @var \Doctrine\Solr\Converter\SolrDocumentConverter */
+    /** @var \Doctrine\Solr\Converter\DocumentConverter */
     protected $converter;
 
     protected function init()

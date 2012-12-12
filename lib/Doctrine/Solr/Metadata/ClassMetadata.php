@@ -15,6 +15,11 @@ interface ClassMetadata extends BaseClassMetadata
     public function getSolrFieldName($fieldName);
 
     /**
+     * @return array with solrNames as keys and standardNames as values
+     */
+    public function getSolrToStandardFieldNameMapping();
+
+    /**
      * Returns type of the field.
      *
      * @return string

@@ -21,7 +21,7 @@ class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
     {
         $this->query = $this->getMock('Doctrine\\Solr\\QueryType\\Update\\Query', [], [], '', false);
         $this->client = $this->getMock('Solarium\\Client', [], [], '', false);
-        $converter = $this->getMock('Doctrine\\Solr\\Converter\\SolrDocumentConverter', [], [], '', false);
+        $converter = $this->getMock('Doctrine\\Solr\\Converter\\DocumentConverter', [], [], '', false);
 
         $this->client->expects($this->once())
                      ->method('createUpdate')

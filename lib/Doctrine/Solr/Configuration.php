@@ -1,19 +1,16 @@
 <?php
 namespace Doctrine\Solr;
 
+use Doctrine\Solr\Manager\DoctrineSolrManager;
 use Solarium\Client;
-
 use Doctrine\Common\Annotations\Reader;
-
 use Doctrine\Solr\Metadata\Driver\AnnotationDriver;
-
 use Doctrine\Common\Annotations\AnnotationReader;
 
 class Configuration extends AbstractConfiguration
 {
     /**
      * Sets metadata driver closure.
-     *
      * @param callable $driver should return a MappingDriver instance.
      */
     public function setMetadataDriverImpl(callable $driver)
@@ -23,7 +20,6 @@ class Configuration extends AbstractConfiguration
 
     /**
      * Returns metadata driver.
-     *
      * @return MappingDriver
      */
     public function getMetadataDriverImpl()
@@ -32,8 +28,43 @@ class Configuration extends AbstractConfiguration
     }
 
     /**
+     * Sets DoctrineSolrManager closure.
+     * @param callable $client should return a DoctrineSolrManager instance.
+     */
+    public function setDoctrineSolrManager(callable $dsm)
+    {
+        $this->setAttributeClosure('doctrineSolrManager', $dsm);
+    }
+
+    /**
+     * Returns DoctrineSolrManager.
+     * @return DoctrineSolrManager
+     */
+    public function getDoctrineSolrManager()
+    {
+        return $this->getAttribute('doctrineSolrManager');
+    }
+
+    /**
+     * Sets ClassMetadataFactory closure.
+     * @param callable $client should return a ClassMetadataFactory instance.
+     */
+    public function setClassMetadataFactory(callable $cmf)
+    {
+        $this->setAttributeClosure('classMetadataFactory', $cmf);
+    }
+
+    /**
+     * Returns ClassMetadataFactory.
+     * @return ClassMetadataFactory
+     */
+    public function getClassMetadataFactory()
+    {
+        return $this->getAttribute('classMetadataFactory');
+    }
+
+    /**
      * Sets solarium client closure.
-     *
      * @param callable $client should return a Solarium\Client instance.
      */
     public function setSolariumClientImpl(callable $client)
@@ -43,7 +74,6 @@ class Configuration extends AbstractConfiguration
 
     /**
      * Returns solarium client.
-     *
      * @return Solarium\Client
      */
     public function getSolariumClientImpl()
@@ -51,44 +81,47 @@ class Configuration extends AbstractConfiguration
         return $this->getAttribute('solariumClientImpl');
     }
 
+    protected static $defaultConfig = [
+        'reader' => 'Doctrine\\Common\\Annotations\\AnnotationReader',
+        'mapping_driver' => 'Doctrine\\Solr\\Metadata\\Driver\\AnnotationDriver',
+        'solarium_client' => 'Solarium\\Client',
+        'solarium_client_config' => null,
+        'doctrine_solr_manager' => 'Doctrine\\Solr\\Manager\\DoctrineSolrManager',
+        'class_metadata_factory' => 'Doctrine\\Solr\\Metadata\\ClassMetadataFactory',
+        'converter' => 'Doctrine\\Solr\\Converter\\DocumentConverter'
+    ];
+
     /**
-     * @param {array|Configuration} $conf
+     * @param {array} $conf
      * @throws ErrorException
      * @return \Doctrine\Solr\Configuration
      */
-    public static function fromConfig($conf) {
-        if ($conf instanceof Configuration) {
-            return $conf;
-        }
+    public static function fromConfig(array $conf) {
+        $config = array_merge(self::$defaultConfig, $conf);
 
         $configuration = new Configuration();
 
-        if (isset($conf['reader'])) {
-            $reader = $conf['reader'];
-            if (! $reader instanceof Reader) {
-                throw new \ErrorException(
-                    "Option 'reader' must implement Doctrine\\Common\\Annotations\\Reader."
-                );
-            }
-        } else {
-            $reader = new AnnotationReader();
-        }
+        $reader = $config['reader'];
+        $mapping_driver = $config['mapping_driver'];
+        $solarium_client = $config['solarium_client'];
+        $solarium_client_config = $config['solarium_client_config'];
+        $doctrine_solr_manager = $config['doctrine_solr_manager'];
+        $class_metadata_factory = $config['class_metadata_factory'];
 
-        $configuration->setMetadataDriverImpl(function() use ($reader) {
-            return new AnnotationDriver($reader);
+        $configuration->setMetadataDriverImpl(function() use ($reader, $mapping_driver) {
+            return new $mapping_driver(new $reader());
         });
 
-        if (isset($conf['client'])) {
-            $solariumClientConfig = $conf['client'];
-            if (!is_array($solariumClientConfig)) {
-                throw new \ErrorException("Option 'client' must be an array.");
-            }
-        } else {
-            $solariumClientConfig = null;
-        }
+        $configuration->setSolariumClientImpl(function() use ($solarium_client, $solarium_client_config) {
+            return new $solarium_client($solarium_client_config);
+        });
 
-        $configuration->setSolariumClientImpl(function() use ($solariumClientConfig) {
-            return new Client($solariumClientConfig);
+        $configuration->setDoctrineSolrManager(function() use ($doctrine_solr_manager, $configuration) {
+            return new $doctrine_solr_manager($configuration);
+        });
+
+        $configuration->setClassMetadataFactory(function() use ($class_metadata_factory, $configuration) {
+            return new $class_metadata_factory($configuration);
         });
 
         return $configuration;

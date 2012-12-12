@@ -9,6 +9,6 @@ namespace Doctrine\Solr\Converter;
 interface Converter
 {
     public function toSolrDocument($document);
-    public function toDocument($document);
+    public function fromSolrDocument($document, $class);
     public function toQuery($document);
 }

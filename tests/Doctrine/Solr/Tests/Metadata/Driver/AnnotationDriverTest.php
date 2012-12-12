@@ -1,6 +1,5 @@
 <?php
 namespace Doctrine\Solr\Tests\Metadata\Driver;
-
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Solr\Metadata\ClassMetadata;
 use Doctrine\Solr\Metadata\DocumentMetadata;
@@ -42,10 +41,9 @@ class AnnotationDriverTest extends PHPUnit_Framework_TestCase
      */
     public function testLoadMetadataThrowsExceptionIfClassMetadataNotSupported()
     {
-        $this->driver->loadMetadataForClass(
-            $this->className,
-            new UnsupportedClassMetadata()
-        );
+        $this->driver
+                ->loadMetadataForClass($this->className,
+                        new UnsupportedClassMetadata());
     }
 
     /**
@@ -56,10 +54,8 @@ class AnnotationDriverTest extends PHPUnit_Framework_TestCase
         $dm = new DocumentMetadata("NoAnnotataionClass");
         $dm->reflClass = new \ReflectionClass(new NoAnnotationClass());
 
-        $this->driver->loadMetadataForClass(
-            '',
-            $dm
-        );
+        $this->driver
+                ->loadMetadataForClass('', $dm);
     }
 }
 
@@ -119,6 +115,10 @@ class UnsupportedClassMetadata implements ClassMetadata
     public function getIdentifierFieldNames()
     {
     }
+    public function getSolrToStandardFieldNameMapping()
+    {
+    }
+
 }
 
 class NoAnnotationClass

@@ -2,10 +2,10 @@
 namespace Doctrine\Solr\Tests\Converter;
 
 use Doctrine\Solr\Metadata\DocumentMetadata;
-use Doctrine\Solr\Converter\SolrDocumentConverter;
+use Doctrine\Solr\Converter\DocumentConverter;
 use PHPUnit_Framework_TestCase;
 
-class SolrDocumentConverterTest extends PHPUnit_Framework_TestCase
+class DocumentConverterTest extends PHPUnit_Framework_TestCase
 {
     public function testConverterBasic()
     {
@@ -18,7 +18,7 @@ class SolrDocumentConverterTest extends PHPUnit_Framework_TestCase
             ->method('getMetadataFor')
             ->will($this->returnValue($class));
 
-        $conv = new SolrDocumentConverter($cmf);
+        $conv = new DocumentConverter($cmf);
 
         $document = new DocumentMock();
         $document->name = "Name";

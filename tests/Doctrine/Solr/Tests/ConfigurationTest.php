@@ -32,13 +32,11 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
 
     public function testFromConfigReturnsProperConfiguration()
     {
-        $reader = new AnnotationReader();
-
         $conf = [
-            'client' => [
+            'solarium_client_config' => [
                 'host' => 'localhost'
             ],
-            'reader' => $reader,
+            'reader' => 'Doctrine\\Common\\Annotations\\AnnotationReader',
         ];
 
         $config = Configuration::fromConfig($conf);
@@ -46,28 +44,6 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf("Solarium\\Client", $config->getSolariumClientImpl());
         $this->assertInstanceOf("Doctrine\\Solr\\Metadata\\Driver\\AnnotationDriver", $config->getMetadataDriverImpl());
 
-        $this->assertEquals($reader, $config->getMetadataDriverImpl()->getReader());
-    }
-
-    /**
-     * @expectedException \ErrorException
-     */
-    public function testFromConfigThrowsErrorIfReaderInvalid() {
-        $conf = [
-            'reader' => "string"
-        ];
-
-        Configuration::fromConfig($conf);
-    }
-
-    /**
-     * @expectedException \ErrorException
-     */
-    public function testFromConfigThrowsErrorIfClientInvalid() {
-        $conf = [
-            'client' => "string"
-        ];
-
-        Configuration::fromConfig($conf);
+        $this->assertEquals('Doctrine\\Common\\Annotations\\AnnotationReader', get_class($config->getMetadataDriverImpl()->getReader()));
     }
 }

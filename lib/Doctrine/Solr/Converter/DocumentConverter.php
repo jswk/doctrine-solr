@@ -1,10 +1,12 @@
 <?php
 namespace Doctrine\Solr\Converter;
+use Solarium\QueryType\Select\Result\AbstractDocument;
+
 use Solarium\QueryType\Update\Query\Document;
 use Doctrine\Solr\Metadata\DocumentMetadata;
 use Doctrine\Solr\Metadata\ClassMetadataFactory;
 
-class SolrDocumentConverter implements Converter
+class DocumentConverter implements Converter
 {
     /** @var \Doctrine\Solr\Metadata\ClassMetadataFactory */
     private $cmf;
@@ -28,28 +30,45 @@ class SolrDocumentConverter implements Converter
         $converted = new Document();
 
         foreach ($metadata->getFieldNames() as $fieldName) {
-            $converted
-                    ->addField($metadata->getSolrFieldName($fieldName),
-                            $document->$fieldName);
+            $converted->addField($metadata->getSolrFieldName($fieldName), $document->$fieldName);
         }
 
         return $converted;
     }
 
-    public function toDocument($document)
+    /**
+     * Returns converted $document
+     *
+     * @param AbstractDocument $document
+     * @return \Solarium\QueryType\Update\Query\Document
+     */
+    public function fromSolrDocument($document, $class)
     {
-        // TODO: Auto-generated method stub
+        /** @var DocumentMetadata $metadata */
+        $metadata = $this->cmf->getMetadataFor($class);
 
+        $converted = new $class();
+
+        $map = $metadata->getSolrToStandardFieldNameMapping();
+
+        foreach ($document->getFields() as $field => $value) {
+            $converted->{$map[$field]} = $value;
+        }
+
+        return $converted;
     }
 
     /**
      * Converts $document to query matching all its fields.
      *
-     * @param $document
+     * @param $document Document
      * @return string
      */
-    public function toQuery($document)
+    public function toQuery($document, $toSolrDocument = false)
     {
+        if ($toSolrDocument) {
+            $document = $this->toSolrDocument($document);
+        }
         $query = array();
         foreach ($document->getIterator() as $key => $value) {
             $query[] = "(${key}:\"${value}\")";

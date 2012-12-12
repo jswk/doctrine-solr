@@ -62,16 +62,11 @@ class DocumentMetadata implements ClassMetadata
             throw new \InvalidArgumentException("Can't edit field information");
         }
 
-        if (!array_key_exists(
-            (string) $field['type'],
-            $this::$allowedFieldTypes
-        )) {
-            throw new \InvalidArgumentException(
-                "Field type " . $field['type'] . " isn't allowed"
-            );
+        if (!isset($field['solrFieldName'])) {
+            $field['solrFieldName'] = $this->convertToSolrFieldName($name, $field['type']);
         }
 
-        $allowedTags = array('type' => 1, 'uniqueKey' => 1);
+        $allowedTags = array('type' => 1, 'uniqueKey' => 1, 'solrFieldName' => 1);
         $this->fields[$name] = array_intersect_key($field, $allowedTags);
     }
 
@@ -129,6 +124,29 @@ class DocumentMetadata implements ClassMetadata
     }
 
     /**
+     * @param {string} $fieldName
+     * @param {string} $type
+     * @return {string} corresponding solrFieldName
+     */
+    protected function convertToSolrFieldName($fieldName, $type)
+    {
+        if (!array_key_exists(
+            (string) $type,
+            $this::$allowedFieldTypes
+        )) {
+            throw new \InvalidArgumentException(
+                "Field type " . $type . " isn't allowed"
+            );
+        }
+
+        return str_replace(
+            '*',
+            $fieldName,
+            $this::$allowedFieldTypes[$type]
+        );
+    }
+
+    /**
      * {inherit-doc}
      */
     public function getSolrFieldName($fieldName)
@@ -139,11 +157,18 @@ class DocumentMetadata implements ClassMetadata
             );
         }
 
-        return str_replace(
-            '*',
-            $fieldName,
-            $this::$allowedFieldTypes[$this->getTypeOfField($fieldName)]
-        );
+        return $this->fields[$fieldName]['solrFieldName'];
+    }
+
+    /**
+     * {inherit-doc}
+     */
+    public function getSolrToStandardFieldNameMapping() {
+        $out = array();
+        foreach ($this->fields as $name => $field) {
+            $out[$field['solrFieldName']] = $name;
+        }
+        return $out;
     }
 
     /**
@@ -171,7 +196,7 @@ class DocumentMetadata implements ClassMetadata
      * @param string $fieldName
      * @return array
      */
-    public function getField($fieldName)
+    protected function getField($fieldName)
     {
         if ($this->hasField($fieldName)) {
             return $this->fields[$fieldName];
