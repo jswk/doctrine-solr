@@ -91,6 +91,10 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     ) {
         /** @var $class DocumentMetadata */
 
+        if ($parent) {
+            $this->addInheritedFields($class, $parent);
+        }
+
         try {
             $this->getDriver()->loadMetadataForClass($class->getName(), $class);
         } catch (\ReflectionException $e) {
@@ -113,5 +117,18 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     {
         return new DocumentMetadata($className);
 
+    }
+
+    private function addInheritedFields(DocumentMetadata $subClass, DocumentMetadata $parentClass)
+    {
+        foreach ($parentClass->fields as $fieldName => $mapping) {
+            if ( ! isset($mapping['inherited'])) {
+                $mapping['inherited'] = $parentClass->name;
+            }
+            if ( ! isset($mapping['declared'])) {
+                $mapping['declared'] = $parentClass->name;
+            }
+            $subClass->addInheritedField($fieldName, $mapping);
+        }
     }
 }

@@ -42,7 +42,9 @@ class DocumentConverter implements Converter
         $map = $metadata->getSolrToStandardFieldNameMapping();
 
         foreach ($document->getFields() as $field => $value) {
-            $converted->{$map[$field]} = $value;
+            if (isset($map[$field])) {
+                $converted->{$map[$field]} = $value;
+            }
         }
 
         return $converted;

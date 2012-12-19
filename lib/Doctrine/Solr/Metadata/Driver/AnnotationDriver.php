@@ -15,6 +15,11 @@ use Doctrine\Solr\Metadata\DocumentMetadata;
  */
 class AnnotationDriver extends DoctrineAnnotationDriver
 {
+    protected static $reservedFieldNames = [
+        '*',
+        'score'
+    ];
+
     protected $entityAnnotationClasses = array(
         "Doctrine\\Solr\\Mapping\\Annotations\\Document" => 1,
     );
@@ -65,6 +70,10 @@ class AnnotationDriver extends DoctrineAnnotationDriver
         }
 
         foreach ($reflClass->getProperties() as $property) {
+            if (in_array($property, self::$reservedFieldNames)) {
+                throw new \InvalidArgumentException("Reserved SOLR property name: " . $property);
+            }
+
             $mapping = array();
 
             foreach ($this->reader->getPropertyAnnotations($property) as $annot) {

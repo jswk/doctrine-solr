@@ -52,6 +52,61 @@ class ClassMetadataFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($cm, $cm1);
 
     }
+
+    public function testClassMetadataFactoryLoadsNestedDocumentsMetadata()
+    {
+        $mockDriver = new MappingDriverMock();
+
+        // Class Metadata
+        $cm = new DocumentMetadata('Doctrine\\Solr\\Tests\\Mapping\\Document1');
+        $cm->addField(
+            [
+                'name' => 'naame',
+                'type' => 'string'
+            ]
+        );
+        $cm->addField(
+            [
+                'name' => 'id',
+                'type' => 'string',
+                'uniqueKey' => true
+            ]
+        );
+
+        // Extending Class Metadata
+        $cme = new DocumentMetadata('Doctrine\\Solr\\Tests\\Mapping\\Document2');
+        $cme->addField(
+            [
+                'name' => 'anotherProperty',
+                'type' => 'string'
+            ]
+        );
+
+        $driver = $this->getMock('Doctrine\\Solr\\Metadata\\Driver\\AnnotationDriver', [], [], '', false);
+        $driver->expects($this->any())
+               ->method('loadMetadataForClass');
+
+        $config = $this->getMock('Doctrine\\Solr\\Configuration', [], [], '', false);
+        $config->expects($this->once())
+               ->method('getMetadataDriverImpl')
+               ->will($this->returnValue($driver));
+
+        $cmf = new ClassMetadataFactoryTestSubject($config);
+        $cmf->setMetadataForClass(
+            'Doctrine\\Solr\\Tests\\Mapping\\Document1',
+            $cm
+        );
+        $cmf->setMetadataForClass(
+            'Doctrine\\Solr\\Tests\\Mapping\\Document2',
+            $cme
+        );
+
+        $cm1 = $cmf->getMetadataFor('Doctrine\\Solr\\Tests\\Mapping\\Document2');
+        $this->assertTrue($cm1->hasField('naame'));
+        $this->assertTrue($cm1->hasField('id'));
+        $this->assertTrue($cm1->hasField('anotherProperty'));
+
+    }
 }
 
 /* Test subject class with overriden factory method for mocking purposes */

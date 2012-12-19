@@ -225,6 +225,11 @@ class DocumentMetadata implements ClassMetadata
         );
     }
 
+    public function addInheritedField($fieldName, array $field)
+    {
+        $this->fields[$fieldName] = $field;
+    }
+
     public function getIdentifier()
     {
         return array();
