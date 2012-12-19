@@ -27,15 +27,36 @@ class Query extends SelectQuery
 
     protected function init()
     {
-        parent::init();
         $this->config = $this->options['config'];
-        //$this->converter = $this->config->getConverterImpl();
         $this->documentMetadata = $this->config->getClassMetadataFactory()->getMetadataFor($this->options['mappedDocument']);
-        $this->converter = $this->config->getConverterImpl();
+        $this->converter = $this->config->getConverter();
+        parent::init();
     }
 
+    /**
+     * Returns Converter associated with this Query.
+     *
+     * @return \Doctrine\Solr\Converter\Converter
+     */
+    public function getConverter() {
+        return $this->converter;
+    }
+
+    public function getResponseParser() {
+        $converter = $this->converter;
+        $documentClass = $this->getOption('mappedDocument');
+        return new ResponseParser(function ($document) use ($converter, $documentClass) {
+            return $converter->fromSolrDocument($document, $documentClass);
+        });
+    }
+
+    /**
+     * Sets query to match passed $document.
+     * @param $document
+     * @param {boolean} $toSolrDocument if set to false the document won't be converted
+     */
     public function setQueryByDocument($document, $toSolrDocument = true) {
-        parent::setQuery($this->converter->toQuery($document, $toSolrDocument));
+        return parent::setQuery($this->converter->toQuery($document, $toSolrDocument));
     }
 
     public function addField($field)

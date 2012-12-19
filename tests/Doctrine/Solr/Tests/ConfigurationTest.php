@@ -11,7 +11,7 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
 {
     public function testDriverImplementation()
     {
-        $config = new Configuration();
+        $config = new TestConfiguration();
 
         $driver = $this->getMock('Doctrine\\Solr\\Metadata\\Driver\\AnnotationDriver', [], [], '', false);
 
@@ -27,7 +27,7 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
      */
     public function testThrowsBadMethodCallExceptionIfOptionNotSpecifiedEarlier()
     {
-        (new Configuration())->getMetadataDriverImpl();
+        (new TestConfiguration())->getMetadataDriverImpl();
     }
 
     public function testFromConfigReturnsProperConfiguration()
@@ -45,5 +45,13 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf("Doctrine\\Solr\\Metadata\\Driver\\AnnotationDriver", $config->getMetadataDriverImpl());
 
         $this->assertEquals('Doctrine\\Common\\Annotations\\AnnotationReader', get_class($config->getMetadataDriverImpl()->getReader()));
+    }
+}
+
+class TestConfiguration extends Configuration
+{
+    public function __construct()
+    {
+        parent::__construct();
     }
 }

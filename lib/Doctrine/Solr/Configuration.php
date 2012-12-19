@@ -81,6 +81,24 @@ class Configuration extends AbstractConfiguration
         return $this->getAttribute('solariumClientImpl');
     }
 
+    /**
+     * Sets a converter closure.
+     * @param callable $converter should return a Doctrine\Solr\Converter\Converter instance.
+     */
+    public function setConverter(callable $converter)
+    {
+        $this->setAttributeClosure('converter', $converter);
+    }
+
+    /**
+     * Returns converter.
+     * @return Doctrine\Solr\Converter\Converter
+     */
+    public function getConverter()
+    {
+        return $this->getAttribute('converter');
+    }
+
     protected static $defaultConfig = [
         'reader' => 'Doctrine\\Common\\Annotations\\AnnotationReader',
         'mapping_driver' => 'Doctrine\\Solr\\Metadata\\Driver\\AnnotationDriver',
@@ -107,6 +125,7 @@ class Configuration extends AbstractConfiguration
         $solarium_client_config = $config['solarium_client_config'];
         $doctrine_solr_manager = $config['doctrine_solr_manager'];
         $class_metadata_factory = $config['class_metadata_factory'];
+        $converter = $config['converter'];
 
         $configuration->setMetadataDriverImpl(function() use ($reader, $mapping_driver) {
             return new $mapping_driver(new $reader());
@@ -122,6 +141,10 @@ class Configuration extends AbstractConfiguration
 
         $configuration->setClassMetadataFactory(function() use ($class_metadata_factory, $configuration) {
             return new $class_metadata_factory($configuration);
+        });
+
+        $configuration->setConverter(function() use ($converter, $configuration) {
+            return new $converter($configuration);
         });
 
         return $configuration;

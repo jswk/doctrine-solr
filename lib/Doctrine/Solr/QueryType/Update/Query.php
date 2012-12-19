@@ -15,16 +15,8 @@ class Query extends UpdateQuery
     protected function init()
     {
         parent::init();
-
-        if (!isset($this->options['converter'])) {
-            throw new RuntimeException(get_class($this) . " requires converter option to be specifed.");
-        }
-
-        if (!($this->options['converter'] instanceof Converter)) {
-            throw new RuntimeException(get_class($this) . " requires option converter to implement " . get_class(Converter));
-        }
-
-        $this->converter = $this->options['converter'];
+        $this->config = $this->options['config'];
+        $this->converter = $this->config->getConverterImpl();
     }
 
     /**

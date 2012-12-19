@@ -18,7 +18,12 @@ class DocumentConverterTest extends PHPUnit_Framework_TestCase
             ->method('getMetadataFor')
             ->will($this->returnValue($class));
 
-        $conv = new DocumentConverter($cmf);
+        $config = $this->getMock("Doctrine\\Solr\\Configuration", [], [], '', false);
+        $config->expects($this->any())
+               ->method("getClassMetadataFactory")
+               ->will($this->returnValue($cmf));
+
+        $conv = new DocumentConverter($config);
 
         $document = new DocumentMock();
         $document->name = "Name";

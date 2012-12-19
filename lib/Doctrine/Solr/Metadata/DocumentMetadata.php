@@ -23,6 +23,11 @@ class DocumentMetadata implements ClassMetadata
         'boolean' => '*_b',
     ];
 
+    public static $pass = [
+        '*',
+        'score',
+    ];
+
     public $collection;
 
     public $name;
@@ -151,9 +156,12 @@ class DocumentMetadata implements ClassMetadata
      */
     public function getSolrFieldName($fieldName)
     {
+        if (in_array($fieldName, self::$pass)) {
+            return $fieldName;
+        }
         if (!$this->hasField($fieldName)) {
             throw new \InvalidArgumentException(
-                'Cannot get name of non existent field.'
+                'Cannot get name of non existent field ' . $fieldName . "."
             );
         }
 
