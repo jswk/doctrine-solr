@@ -1,6 +1,8 @@
 <?php
 
 namespace Doctrine\Solr\Subscriber;
+use Doctrine\Solr\Configuration;
+
 use Doctrine\Solr\QueryType\Update\Query;
 
 use Solarium\Client;
@@ -22,11 +24,20 @@ use \Doctrine\Solr\Converter\Converter;
  */
 class MongoDBSubscriber implements EventSubscriber
 {
-    /** @var \Solarium\Client */
+    /**
+     * @var \Solarium\Client
+     */
     private $client;
 
-    /** @var \Solarium\QueryType\Update\Query\Query */
+    /**
+     * @var \Doctrine\Solr\QueryType\Select\Query
+     */
     private $query;
+
+    /**
+     * @var Converter
+     */
+    private $converter;
 
     /**
      *
@@ -34,11 +45,12 @@ class MongoDBSubscriber implements EventSubscriber
      * @param Converter $converter
      * @param string $updateOptions
      */
-    public function __construct(Client $client, Converter $converter)
+    public function __construct(Configuration $config)
     {
-        $this->client = $client;
-        $this->query = $client->createUpdate([
-            'converter' => $converter,
+        $this->client = $config->getSolariumClientImpl();
+        $this->converter = $config->getConverter();
+        $this->query = $this->client->createUpdate([
+            'converter' => $this->converter,
         ]);
     }
 
@@ -59,6 +71,9 @@ class MongoDBSubscriber implements EventSubscriber
     public function postFlush(PostFlushEventArgs $eventArgs)
     {
         $this->client->execute($this->query);
+        $this->query = $this->client->createUpdate([
+            'converter' => $this->converter,
+        ]);
     }
 
     /**

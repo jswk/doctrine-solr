@@ -23,18 +23,27 @@ class MongoDBSubscriberTest extends PHPUnit_Framework_TestCase
         $this->client = $this->getMock('Solarium\\Client', [], [], '', false);
         $converter = $this->getMock('Doctrine\\Solr\\Converter\\DocumentConverter', [], [], '', false);
 
-        $this->client->expects($this->once())
+        $config = $this->getMock('Doctrine\\Solr\\Configuration', [], [], '', false);
+        $config->expects($this->any())
+               ->method('getSolariumClientImpl')
+               ->will($this->returnValue($this->client));
+        $config->expects($this->any())
+               ->method('getConverter')
+               ->will($this->returnValue($converter));
+
+        $this->client->expects($this->any())
                      ->method('createUpdate')
                      ->will($this->returnValue($this->query));
 
         // test subject
-        $this->subscriber = new MongoDBSubscriber($this->client, $converter);
+        $this->subscriber = new MongoDBSubscriber($config);
     }
 
     public function tearDown()
     {
         $this->query = null;
         $this->subscriber = null;
+        $this->client = null;
     }
 
     public function testPersist()

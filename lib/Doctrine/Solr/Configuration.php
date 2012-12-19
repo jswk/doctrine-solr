@@ -4,7 +4,7 @@ namespace Doctrine\Solr;
 use Doctrine\Solr\Manager\DoctrineSolrManager;
 use Solarium\Client;
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\Solr\Metadata\Driver\AnnotationDriver;
+use Doctrine\Solr\Metadata\Driver;
 use Doctrine\Common\Annotations\AnnotationReader;
 
 class Configuration extends AbstractConfiguration
@@ -20,7 +20,7 @@ class Configuration extends AbstractConfiguration
 
     /**
      * Returns metadata driver.
-     * @return MappingDriver
+     * @return Driver
      */
     public function getMetadataDriverImpl()
     {
@@ -99,14 +99,38 @@ class Configuration extends AbstractConfiguration
         return $this->getAttribute('converter');
     }
 
+    /**
+     * Sets a subscriber closure.
+     * @param callable $subscriber should return a Doctrine\Solr\Subscriber\... instance.
+     */
+    public function setSubscriber(callable $subscriber)
+    {
+        $this->setAttributeClosure('subscriber', $subscriber);
+    }
+
+    /**
+     * Returns subscriber.
+     * @return Doctrine\Solr\Subscriber\MongoDBSubscriber
+     */
+    public function getSubscriber()
+    {
+        return $this->getAttribute('subscriber');
+    }
+
     protected static $defaultConfig = [
         'reader' => 'Doctrine\\Common\\Annotations\\AnnotationReader',
         'mapping_driver' => 'Doctrine\\Solr\\Metadata\\Driver\\AnnotationDriver',
         'solarium_client' => 'Solarium\\Client',
-        'solarium_client_config' => null,
+        'solarium_client_config' => [
+            'querytype' => [
+                Client::QUERY_SELECT => 'Doctrine\\Solr\\QueryType\\Select\\Query',
+                Client::QUERY_UPDATE => 'Doctrine\\Solr\\QueryType\\Update\\Query',
+            ],
+        ],
         'doctrine_solr_manager' => 'Doctrine\\Solr\\Manager\\DoctrineSolrManager',
         'class_metadata_factory' => 'Doctrine\\Solr\\Metadata\\ClassMetadataFactory',
-        'converter' => 'Doctrine\\Solr\\Converter\\DocumentConverter'
+        'converter' => 'Doctrine\\Solr\\Converter\\DocumentConverter',
+        'subscriber' => 'Doctrine\\Solr\\Subscriber\\MongoDBSubscriber',
     ];
 
     /**
@@ -115,6 +139,10 @@ class Configuration extends AbstractConfiguration
      * @return \Doctrine\Solr\Configuration
      */
     public static function fromConfig(array $conf) {
+        $conf['solarium_client_config'] = array_merge(
+            self::$defaultConfig['solarium_client_config'],
+            (array) $conf['solarium_client_config']
+        );
         $config = array_merge(self::$defaultConfig, $conf);
 
         $configuration = new Configuration();
@@ -126,6 +154,7 @@ class Configuration extends AbstractConfiguration
         $doctrine_solr_manager = $config['doctrine_solr_manager'];
         $class_metadata_factory = $config['class_metadata_factory'];
         $converter = $config['converter'];
+        $subscriber = $config['subscriber'];
 
         $configuration->setMetadataDriverImpl(function() use ($reader, $mapping_driver) {
             return new $mapping_driver(new $reader());
@@ -145,6 +174,10 @@ class Configuration extends AbstractConfiguration
 
         $configuration->setConverter(function() use ($converter, $configuration) {
             return new $converter($configuration);
+        });
+
+        $configuration->setSubscriber(function() use ($subscriber, $configuration) {
+            return new $subscriber($configuration);
         });
 
         return $configuration;

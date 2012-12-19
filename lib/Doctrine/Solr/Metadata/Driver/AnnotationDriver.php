@@ -13,9 +13,9 @@ use Doctrine\Solr\Metadata\DocumentMetadata;
  *
  * @author Jakub Sawicki <jakub.sawicki@slkt.pl>
  */
-class AnnotationDriver extends DoctrineAnnotationDriver
+class AnnotationDriver extends DoctrineAnnotationDriver implements Driver
 {
-    protected static $reservedFieldNames = [
+    protected $reservedFieldNames = [
         '*',
         'score'
     ];
@@ -23,15 +23,6 @@ class AnnotationDriver extends DoctrineAnnotationDriver
     protected $entityAnnotationClasses = array(
         "Doctrine\\Solr\\Mapping\\Annotations\\Document" => 1,
     );
-
-    /**
-     * Registers Annotations namespace for bootstrapping.
-     */
-    public static function registerAnnotationClasses()
-    {
-        // directory must match this file directory
-        AnnotationRegistry::registerAutoloadNamespace("Doctrine\\Solr\\Mapping\\Annotations", __DIR__.'/../../../../');
-    }
 
     public function loadMetadataForClass($className, ClassMetadata $class)
     {
@@ -70,7 +61,7 @@ class AnnotationDriver extends DoctrineAnnotationDriver
         }
 
         foreach ($reflClass->getProperties() as $property) {
-            if (in_array($property, self::$reservedFieldNames)) {
+            if (in_array($property, $this->reservedFieldNames)) {
                 throw new \InvalidArgumentException("Reserved SOLR property name: " . $property);
             }
 
@@ -107,5 +98,14 @@ class AnnotationDriver extends DoctrineAnnotationDriver
     {
         // TODO: change if transient annotations would be introduced
         return false;
+    }
+
+    /**
+     * Registers Annotations namespace for bootstrapping.
+     */
+    public static function registerAnnotationClasses()
+    {
+        // directory must match this file directory
+        AnnotationRegistry::registerAutoloadNamespace("Doctrine\\Solr\\Mapping\\Annotations", __DIR__.'/../../../../');
     }
 }
