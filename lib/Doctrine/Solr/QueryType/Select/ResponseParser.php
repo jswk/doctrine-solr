@@ -25,8 +25,8 @@ class ResponseParser extends SelectResponseParser
         // convert the documents
         $documents = [];
         if (isset($out['documents'])) {
-            foreach ($out as $solrDocument) {
-                $documents[] = call_user_func([$this->convert], $solrDocument);
+            foreach ($out['documents'] as $solrDocument) {
+                $documents[] = call_user_func($this->convert, $solrDocument);
             }
         }
         $out['documents'] = $documents;
